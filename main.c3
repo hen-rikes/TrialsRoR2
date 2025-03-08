@@ -2,6 +2,7 @@ import rlib;
 
 import std::io;
 import std::collections;
+import std::core::mem::allocator;
 
 struct Tile {
     float[<2>] pos;
@@ -19,7 +20,8 @@ struct Map {
     uint value;
 }
 
-fn void save_states(List(<Tile>) *tiles, String file_name) {
+//fn void save_states(List(<Tile>) *tiles, String file_name) { // C3c 0.6.0 syntax
+fn void save_states(List{Tile} *tiles, String file_name) {
     File! file = file::open(file_name, "w");
     defer file.close()!!;
 
@@ -35,11 +37,12 @@ fn void save_states(List(<Tile>) *tiles, String file_name) {
         content.appendf("%s,%d;", (ZString)tile.name, tile.state);
     }
 
-    file.write(content.copy_str())!!;
+    file.write(content.copy_str(allocator::heap()))!!;
     rlib::trace_log(rlib::LOG_INFO, "[INFO] States successfully saved to file <%s>", file_name);
 }
 
-fn List(<Map>) load_states(String file_name) {
+//fn List(<Map>) load_states(String file_name) { // C3c 0.6.0 syntax
+fn List{Map} load_states(String file_name) {
     File! file = file::open(file_name, "r");
     defer file.close()!!;
 
@@ -57,7 +60,8 @@ fn List(<Map>) load_states(String file_name) {
     DString word;
     defer word.free();
 
-    List(<Map>) map;
+    //List(<Map>) map; // C3c 0.6.0 syntax
+    List{Map} map;
     String key = "";
     uint value = 0;
 
@@ -90,7 +94,8 @@ fn List(<Map>) load_states(String file_name) {
 }
 
 fn void main() {
-    HashMap(<String, String>) artifacts_urls;
+    //HashMap(<String, String>) artifacts_urls; // C3c 0.6.0 syntax
+    HashMap{String, String} artifacts_urls;
     artifacts_urls["Chaos"]         = "https://riskofrain2.fandom.com/wiki/Artifact_of_Chaos";
     artifacts_urls["Command"]       = "https://riskofrain2.fandom.com/wiki/Artifact_of_Command";
     artifacts_urls["Death"]         = "https://riskofrain2.fandom.com/wiki/Artifact_of_Death";
@@ -136,7 +141,8 @@ fn void main() {
     bool marked_to_save = false;
 
     uint num_of_tiles = artifacts_dir.count;
-    List(<Tile>) tiles;
+    //List(<Tile>) tiles; // C3c 0.6.0 syntax
+    List{Tile} tiles;
     defer {
         foreach (tile : tiles) {
             rlib::unload_texture(tile.image);
@@ -160,7 +166,8 @@ fn void main() {
     };
 
 
-    List(<Map>) states;
+    //List(<Map>) states; // C3c 0.6.0 syntax
+    List{Map} states;
     if (file::is_file(save_file)) {
         save_file_exists = true;
         states = load_states(save_file);
