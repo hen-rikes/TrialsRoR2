@@ -20,9 +20,8 @@ struct Map {
     uint value;
 }
 
-//fn void save_states(List(<Tile>) *tiles, String file_name) { // C3c 0.6.0 syntax
 fn void save_states(List{Tile} *tiles, String file_name) {
-    File! file = file::open(file_name, "w");
+    File? file = file::open(file_name, "w");
     defer file.close()!!;
 
     if (catch excuse = file) {
@@ -41,9 +40,8 @@ fn void save_states(List{Tile} *tiles, String file_name) {
     rlib::trace_log(rlib::LOG_INFO, "[INFO] States successfully saved to file <%s>", file_name);
 }
 
-//fn List(<Map>) load_states(String file_name) { // C3c 0.6.0 syntax
 fn List{Map} load_states(String file_name) {
-    File! file = file::open(file_name, "r");
+    File? file = file::open(file_name, "r");
     defer file.close()!!;
 
     if (catch excuse = file) {
@@ -51,7 +49,7 @@ fn List{Map} load_states(String file_name) {
         return {};
     }
 
-    usz! num_of_bytes = file::get_size(file_name);
+    usz? num_of_bytes = file::get_size(file_name);
     if (catch excuse = num_of_bytes) {
         rlib::trace_log(rlib::LOG_ERROR, "[ERROR] Couldn't find file <%s>", file_name);
         return {};
@@ -60,13 +58,12 @@ fn List{Map} load_states(String file_name) {
     DString word;
     defer word.free();
 
-    //List(<Map>) map; // C3c 0.6.0 syntax
     List{Map} map;
     String key = "";
     uint value = 0;
 
     for (uint i = 0; i < num_of_bytes; i++) {
-        char! c = file.read_byte();
+        char? c = file.read_byte();
         if (catch excuse = c) {
             rlib::trace_log(rlib::LOG_ERROR, "[ERROR] Couldn't read file <%s>", file_name);
 
