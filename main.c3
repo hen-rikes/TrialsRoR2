@@ -112,11 +112,12 @@ fn void main() {
     artifacts_urls["Swarms"]        = "https://riskofrain2.fandom.com/wiki/Artifact_of_Swarms";
     artifacts_urls["Vengeance"]     = "https://riskofrain2.fandom.com/wiki/Artifact_of_Vengeance";
 
-    int width = 900; 
-    int height = 600;
+    int width = 800; 
+    int height = 620;
 
-    rlib::set_config_flags(rlib::ConfigFlags.FLAG_WINDOW_RESIZABLE.value);
+    rlib::set_config_flags( rlib::FLAG_WINDOW_RESIZABLE | rlib::FLAG_MSAA_4X_HINT);
     rlib::init_window(width, height, "Trials");
+    rlib::set_window_min_size(width, height);
     defer rlib::close_window();
     rlib::set_trace_log_level(rlib::LOG_ERROR);
 
