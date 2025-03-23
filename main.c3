@@ -133,6 +133,18 @@ fn void main() {
     FilePathList artifacts_dir = rlib::load_directory_files(artifacts_path);
     defer rlib::unload_directory_files(artifacts_dir);
 
+    
+    // NOTE: Windows already does sort the file alphabetically.
+    //List{char*} artifacts_names;
+    //for (uint i = 0; i < artifacts_dir.count; i++) {
+    //    artifacts_names.push(ZString.tcopy((ZString)rlib::get_file_name_without_ext(artifacts_dir.paths[i])));
+    //}
+
+    //quicksort(artifacts_names);
+    //foreach (n : artifacts_names) {
+    //    io::printn((ZString)n);
+    //}
+
     String save_file = "states.txt";
     bool save_file_exists = false;
     bool marked_to_save = false;
@@ -156,7 +168,6 @@ fn void main() {
     float tiles_width = (tile_size.x + offset.x) * rez - 25.f;
     float tiles_height = ((tile_size.y + offset.y) * (float)$$ceil((float)num_of_tiles/(float)rez))-50.f;
 
-
     float[<2>] start_pos = { 
         (width * 0.5f) - (tiles_width * 0.5f),
         (height * 0.5f) - (tiles_height * 0.5f),
@@ -174,6 +185,7 @@ fn void main() {
     uint y = 0;
     for (uint i = 1; i < num_of_tiles+1 && artifacts_dir.count != 0; i++) {
         uint state_value_from_file = 0;
+        // TODO: ternary
         if ((uint)(i-1) >= states.len()) { 
             state_value_from_file = 0;
         } else {
