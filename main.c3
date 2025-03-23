@@ -91,7 +91,6 @@ fn List{Map} load_states(String file_name) {
 }
 
 fn void main() {
-    //HashMap(<String, String>) artifacts_urls; // C3c 0.6.0 syntax
     HashMap{String, String} artifacts_urls;
     artifacts_urls["Chaos"]         = "https://riskofrain2.fandom.com/wiki/Artifact_of_Chaos";
     artifacts_urls["Command"]       = "https://riskofrain2.fandom.com/wiki/Artifact_of_Command";
@@ -133,24 +132,12 @@ fn void main() {
     FilePathList artifacts_dir = rlib::load_directory_files(artifacts_path);
     defer rlib::unload_directory_files(artifacts_dir);
 
-    
-    // NOTE: Windows already does sort the file alphabetically.
-    //List{char*} artifacts_names;
-    //for (uint i = 0; i < artifacts_dir.count; i++) {
-    //    artifacts_names.push(ZString.tcopy((ZString)rlib::get_file_name_without_ext(artifacts_dir.paths[i])));
-    //}
-
-    //quicksort(artifacts_names);
-    //foreach (n : artifacts_names) {
-    //    io::printn((ZString)n);
-    //}
-
     String save_file = "states.txt";
     bool save_file_exists = false;
     bool marked_to_save = false;
 
     uint num_of_tiles = artifacts_dir.count;
-    //List(<Tile>) tiles; // C3c 0.6.0 syntax
+
     List{Tile} tiles;
     defer {
         foreach (tile : tiles) {
@@ -161,39 +148,29 @@ fn void main() {
     uint rez = 5; 
     if (num_of_tiles < rez) rez = num_of_tiles;
 
-    // TODO: find a way to correctly scale tile_size
-    float[<2>] tile_size = width*0.123f;
-    float[<2>] offset = 40.f;
+    float padding = 25.f;
+    float[<2>] tile_size = ((float)(height/rez) + padding);
 
-    float tiles_width = (tile_size.x + offset.x) * rez - 25.f;
-    float tiles_height = ((tile_size.y + offset.y) * (float)$$ceil((float)num_of_tiles/(float)rez))-50.f;
+    float tiles_width = (tile_size.x + padding) * rez;
+    float tiles_height = ((tile_size.y + padding) * (float)$$ceil((float)num_of_tiles/(float)rez));
 
     float[<2>] start_pos = { 
         (width * 0.5f) - (tiles_width * 0.5f),
         (height * 0.5f) - (tiles_height * 0.5f),
     };
 
-
-    //List(<Map>) states; // C3c 0.6.0 syntax
     List{Map} states;
     if (file::is_file(save_file)) {
         save_file_exists = true;
         states = load_states(save_file);
     }
 
-    uint x = 0;
-    uint y = 0;
+    uint x = 0; uint y = 0;
     for (uint i = 1; i < num_of_tiles+1 && artifacts_dir.count != 0; i++) {
-        uint state_value_from_file = 0;
-        // TODO: ternary
-        if ((uint)(i-1) >= states.len()) { 
-            state_value_from_file = 0;
-        } else {
-            state_value_from_file = states[(usz)(i-1)].value;
-        }
+        uint state_value_from_file = (uint)(i-1) >= states.len() ? 0 : states[(usz)(i-1)].value;
 
         tiles.push({
-            .pos = { x * (tile_size.x + offset.x) + start_pos.x, y * (tile_size.y + offset.y) + start_pos.y },
+            .pos = { x * (tile_size.x + padding) + start_pos.x, y * (tile_size.y + padding) + start_pos.y },
             .size = tile_size,
             .name = ZString.tcopy((ZString)rlib::get_file_name_without_ext(artifacts_dir.paths[i-1])),
             .image = rlib::load_texture(artifacts_dir.paths[i-1]),
@@ -216,6 +193,32 @@ fn void main() {
     while (!rlib::window_should_close()) {
         width  = rlib::get_screen_width();
         height = rlib::get_screen_height();
+
+        padding = height*0.04f > 30.f ? 30.f : height*0.04f;
+        tile_size = (float[<2>])((float)(height/rez) - 20.f) + padding;
+
+        tiles_width = (tile_size.x + padding) * rez - 25.f;
+        tiles_height = ((tile_size.y + padding) * (float)$$ceil((float)num_of_tiles/(float)rez))-25.f;
+
+        start_pos = { 
+            (width * 0.5f) - (tiles_width * 0.5f),
+            (height * 0.5f) - (tiles_height * 0.5f),
+        };
+
+        x = 0; y = 0;
+        for (uint i = 1; i < num_of_tiles+1 && artifacts_dir.count != 0; i++) {
+            tiles[(usz)i-1].pos = { x * (tile_size.x + padding) + start_pos.x, y * (tile_size.y + padding) + start_pos.y };
+            tiles[(usz)i-1].size = tile_size;
+
+            if (i % rez == 0) {
+                x = 0;
+                y++;
+            } else {
+                x++;
+            }
+        }
+
+        font_size = (uint)(tile_size.x * 0.18f);
 
         foreach (&tile : tiles) {
             if (rlib::check_collision_point_rec(rlib::get_mouse_position(), { tile.pos.x, tile.pos.y, tile.size.x, tile.size.y })) {
@@ -258,7 +261,8 @@ fn void main() {
             rlib::draw_rectange_rounded_lines(tile_dest,
                 0.3f, 
                 1, 
-                2.f, 
+                //2.f, 
+                (int)(tile_dest.size.y*0.02f) > 2.f ? 3.f : (int)(tile_dest.size.y*0.02f),
                 rlib::get_color(0xd2d2d2ff));
 
             // Artifact name
@@ -272,11 +276,11 @@ fn void main() {
             if (tile.state) {
                 float[<2>] final_size = { tile_dest.size.x * 0.28f, tile_dest.size.y * 0.28f };
 
-                rlib::draw_circleV({tile_dest.pos.x+(final_size.x*0.5f)+4.f, tile_dest.pos.y+4.f+(final_size.x*0.5f)}, final_size.x*0.6f, rlib::get_color(0x1c1c1cff));
+                float a = 0.03f;
+                rlib::draw_circleV({tile_dest.pos.x+(final_size.x*0.5f)+(tile_dest.size.x*a), tile_dest.pos.y+(tile_dest.size.y*a)+(final_size.x*0.5f)}, final_size.x*0.6f, rlib::get_color(0x1c1c1cff));
                 rlib::draw_texture_pro(done_image,
                     {{0.f, 0.f}, {done_image.width, done_image.height}},
-                    //{pos, size},
-                    {{tile_dest.pos.x+4.f, tile_dest.pos.y+4.f}, final_size},
+                    {{tile_dest.pos.x+(tile_dest.size.x*a), tile_dest.pos.y+(tile_dest.size.y*a)}, final_size},
                     {0.f, 0.f},
                     0.f,
                     rlib::WHITE);

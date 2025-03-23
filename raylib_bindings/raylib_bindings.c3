@@ -33,6 +33,7 @@ extern fn bool is_mouse_button_down(int button) @extern("IsMouseButtonDown");
 extern fn CInt get_monitor_width(CInt monitor) @extern("GetMonitorWidth");
 extern fn CInt get_monitor_height(CInt monitor) @extern("GetMonitorHeight");
 extern fn void draw_circleV(float[2] center, float radius, char[4] color) @extern("DrawCircleV");
+extern fn void draw_circle_lines(CInt centerX, CInt centerY, float radius, char[4] color) @extern("DrawCircleLines");
 extern fn void draw_rectangleV(float[2] position, float[2] size, char[4] color) @extern("DrawRectangleV");
 extern fn Font load_font(char *fileName) @extern("LoadFont");
 extern fn void unload_font(Font font) @extern("UnloadFont");
