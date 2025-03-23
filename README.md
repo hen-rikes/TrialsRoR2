@@ -13,8 +13,8 @@ As imagens dos Artefatos foram tiradas da [wiki](https://riskofrain2.fandom.com/
 
 ## Como compilar o código e rodar o programa
 ````
-.\build.bat
-.\main.exe
+$ .\build.bat
+$ .\main.exe
 ````
 
 ## Plataformas
